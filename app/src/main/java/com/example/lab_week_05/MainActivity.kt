@@ -54,21 +54,26 @@ class MainActivity : AppCompatActivity() {
             override fun onResponse(call: Call<List<ImageData>>, response: Response<List<ImageData>>) {
                 if (response.isSuccessful) {
                     val imageList = response.body()
-                    val imageUrl = imageList?.firstOrNull()?.imageUrl
+                    val firstImage = imageList?.firstOrNull()
 
-                    if (!imageUrl.isNullOrBlank()) {
-                        apiResponseView.text = getString(R.string.image_placeholder, imageUrl)
-
+                    if (firstImage != null) {
                         Glide.with(this@MainActivity)
-                            .load(imageUrl)
+                            .load(firstImage.imageUrl)
                             .into(imageResultView)
+
+                        val catBreed = if (firstImage.breeds?.isNotEmpty() == true) {
+                            firstImage.breeds[0].name
+                        } else {
+                            "Unknown"
+                        }
+                        apiResponseView.text = getString(R.string.breed_placeholder, catBreed)
+
                     } else {
-                        Log.d(MAIN_ACTIVITY, "Image URL is null or empty")
-                        apiResponseView.text = "Image URL not found"
+                        Log.d(MAIN_ACTIVITY, "Image list is null or empty")
+                        apiResponseView.text = "No image found"
                     }
                 } else {
-                    Log.e(MAIN_ACTIVITY, "Failed to get a successful response\n" +
-                            response.errorBody()?.string().orEmpty())
+                    Log.e(MAIN_ACTIVITY, "Failed to get a successful response")
                 }
             }
 
